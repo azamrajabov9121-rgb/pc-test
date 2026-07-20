@@ -1,6 +1,6 @@
 {
   "name": "my-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "electron/main.js",
@@ -30,12 +30,24 @@
   "build": {
     "appId": "com.azamrajabov9121.pctest",
     "productName": "PcTest",
-    "files": ["out/**/*", "electron/**/*", "package.json"],
-    "directories": { "output": "release" },
-    "publish": [
-      { "provider": "github", "owner": "azamrajabov9121-rgb", "repo": "pc-test" }
+    "files": [
+      "out/**/*",
+      "electron/**/*",
+      "package.json"
     ],
-    "win": { "target": "nsis" },
+    "directories": {
+      "output": "release"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "azamrajabov9121-rgb",
+        "repo": "pc-test"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
     "nsis": {
       "artifactName": "${productName}-Setup-${version}.${ext}",
       "oneClick": false,
