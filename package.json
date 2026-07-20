@@ -2,21 +2,47 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "electron:dev": "next build && electron .",
+    "electron:build": "next build && electron-builder"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "serve-handler": "^6.1.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4"
+  },
+  "build": {
+    "appId": "com.azamrajabov9121.pctest",
+    "productName": "PcTest",
+    "files": ["out/**/*", "electron/**/*", "package.json"],
+    "directories": { "output": "release" },
+    "publish": [
+      { "provider": "github", "owner": "azamrajabov9121-rgb", "repo": "pc-test" }
+    ],
+    "win": { "target": "nsis" },
+    "nsis": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
