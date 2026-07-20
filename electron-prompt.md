@@ -238,3 +238,74 @@ ELECTRON_BUILDER_BINARIES_MIRROR="https://npmmirror.com/mirrors/electron-builder
 npm version patch        # versiyani oshiradi, commit va teg yaratadi
 git push --follow-tags   # kod + teg -> Actions build qiladi -> Release chiqadi
 ```
+
+---
+
+## 11. Amalda qo'llanganda topilgan qo'shimcha holatlar
+
+Bu bo'lim — yuqoridagi rejani **shu loyihada** (Vite emas, Next.js 16, App Router) ishga
+tushirishda haqiqatan duch kelingan farqlar va tuzoqlar. 1-10 bandlar o'zgarmadi, faqat
+quyidagilar ular ustiga qo'shildi.
+
+### 11.1 Loyiha Vite emas, Next.js edi
+
+`vite.config.js` umuman yo'q edi — bu Next.js loyihasi (`next.config.mjs`, `app/` router).
+`base: './'` qo'yadigan joy yo'q, `vite build` degan skript ham yo'q.
+
+**TUZOQ 13:** Next.js static export (`output: "export"`) **root-relative** yo'llar bilan
+HTML chiqaradi (`/_next/...`). Buni `file://` orqali ochsa, TUZOQ 2 dagi bilan bir xil
+oq ekran chiqadi — lekin Vite'dagi `base: './'` yechimi Next.js'da yo'q (rasman
+qo'llab-quvvatlanmaydi). Yechim: `electron/main.js` ichida `serve-handler` orqali
+`out/` papkasini `127.0.0.1` da lokal HTTP serverga ko'tarib, `loadURL('http://127.0.0.1:<port>')`
+bilan ochish — `loadFile` emas. Port `0` bilan tasodifiy bo'sh portga bog'lanadi, shuning
+uchun portlar to'qnashuvi bo'lmaydi.
+
+`serve-handler` ham xuddi `electron-updater` kabi **`dependencies`** da bo'lishi shart
+(TUZOQ 1 bilan bir xil sabab).
+
+`next.config.mjs` ga `images.unoptimized: true` ham qo'shildi — static export'da Next.js
+Image Optimization API ishlamaydi, `next/image` ishlatilgan sahifalar (`/products`,
+`/recipes`) shusiz build paytida xato beradi.
+
+`package.json` skriptlari: `"electron:dev": "next build && electron ."`,
+`"electron:build": "next build && electron-builder"` — `vite build` o'rniga `next build`.
+`build.files` da `dist/**/*` emas, `out/**/*`.
+
+### 11.2 TUZOQ 10 aynan shu muhitda ushlandi
+
+Test paytida `ELECTRON_RUN_AS_NODE=1` haqiqatan ham xalaqit berdi — va bitta muhim nuans
+qo'shimcha topildi: **har bir yangi terminal chaqiruvida bu o'zgaruvchi qayta paydo bo'ladi**
+(shell holati chaqiruvlar orasida saqlanmaydi). `Remove-Item Env:ELECTRON_RUN_AS_NODE` bilan
+`.exe`ni ishga tushirish **bitta komandada** bo'lishi kerak — aks holda keyingi chaqiruvda
+o'zgaruvchi yana `1` bo'lib, dastur yana sababsiz jimgina yopiladi.
+
+### 11.3 GitHub Actions birinchi push'da ishga tushmadi
+
+Teg push qilingandan keyin ham (`git push --follow-tags`), workflow **umuman** ishga
+tushmadi — "There are no workflow runs yet" — garchi `release.yml` "active" deb ro'yxatda
+tursa ham. Sabab: repo sozlamalarida Actions ruxsati o'chirilgan edi
+(Settings → Actions → General → "Allow all actions and reusable workflows"). Buni yoqqandan
+keyin ham eski teg avtomatik qayta ishga tushmaydi — tegni o'chirib qayta push qilish kerak
+bo'ldi:
+
+```
+git push origin :refs/tags/vX.Y.Z   # tegni remote'dan o'chirish
+git push origin refs/tags/vX.Y.Z    # qayta push — workflow shu safar ishga tushadi
+```
+
+### 11.4 `"type": "module"` package.json ga qo'shildi
+
+`electron/main.js` ESM (`import`) sintaksisda, lekin `package.json`da `"type": "module"`
+yo'q edi — Node har safar faylni qayta parslab, `MODULE_TYPELESS_PACKAGE_JSON` ogohlantirishi
+chiqarardi (funksional xato emas, lekin ishga tushish sekinlashadi). Loyihada hech qanday
+`require()` yo'qligi tekshirilgach, `"type": "module"` qo'shildi va ogohlantirish yo'qoldi.
+
+### 11.5 Tasdiqlangan release'lar
+
+- **v0.1.1** — dastlabki Electron+auto-updater sozlamasi. Release muvaffaqiyatli,
+  `draft:false`, 3 ta asset (`latest.yml`, `.exe`, `.exe.blockmap`) — barchasi tekshirildi.
+- **v0.1.2** — "Foydalanuvchilar" yorlig'i "USERS" ga o'zgartirildi (menu, sahifa sarlavhasi,
+  statistika label'i, izohlar tavsifi). Release muvaffaqiyatli, `draft:false`, 3 ta asset ham
+  mavjud (asset havolalarini shu ish muhitining tarmoq cheklovi tufayli to'g'ridan-to'g'ri
+  yuklab bo'lmadi — `release-assets.githubusercontent.com` shu sandbox'da bloklangan;
+  GitHub API orqali metadata darajasida tasdiqlangan).
