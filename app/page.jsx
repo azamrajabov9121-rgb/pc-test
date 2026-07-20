@@ -48,7 +48,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
-          label="Foydalanuvchilar"
+          label="USERS"
           value={users.data?.length ?? 0}
           loading={users.loading}
           tone="text-zinc-900"

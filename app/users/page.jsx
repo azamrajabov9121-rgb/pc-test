@@ -7,7 +7,7 @@ export default function UsersPage() {
     <DataPage
       cacheKey="users"
       url="https://jsonplaceholder.typicode.com/users"
-      title="Foydalanuvchilar"
+      title="USERS"
       description="JSONPlaceholder ochiq API'sidan olingan ro'yxat."
     >
       {(users) => (

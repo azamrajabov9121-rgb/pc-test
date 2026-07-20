@@ -8,7 +8,7 @@ export default function CommentsPage() {
       cacheKey="comments"
       url="https://dummyjson.com/comments?limit=30"
       title="Izohlar"
-      description="Foydalanuvchilar qoldirgan izohlar (DummyJSON)."
+      description="USERS qoldirgan izohlar (DummyJSON)."
     >
       {(data) => (
         <div className="space-y-3">
